@@ -32,7 +32,7 @@ def addAlumno():
             "promedio": int(request.json['promedio'])
         }
         alumnos.append(new_alumno)
-        return jsonify({"message": "Alumno añadido correctamente", "alumnos": alumnos})
+        return jsonify({"message": "Alumno añadido correctamente", "alumnos": alumnos}), 201
     # Excepción id y promedio deben ser int
     except ValueError:    
         return jsonify({"error": "El ID y el promedio deben ser números enteros"}), 400
