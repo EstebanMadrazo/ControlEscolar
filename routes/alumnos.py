@@ -5,11 +5,13 @@ import boto3
 import botocore.exceptions
 from werkzeug.utils import secure_filename
 
-sns = boto3.client('sns', region_name='us-east-1')  # Ajusta la región según tus necesidades
+#Deharcodear credenciales en el futuro
+sns = boto3.client('sns', region_name='us-east-1')  
 TOPIC_ARN = 'arn:aws:sns:us-east-1:816290581866:proyectoAWS-topic'
-aws_access_key_id="ASIA34DVVZVVAGQYBBQ2"
-aws_secret_access_key="e3K2Cf87Qo10yimzk9Izy6mlpCfZvOohl26CKcR5"
-aws_session_token="FwoGZXIvYXdzEJr//////////wEaDLHfHsmY+dhXi1Tq3CLLAUcNNePBuk9OP6P/ONuCNvWYhCwXO0qiAfvEvTlzsiQujE/oD61J+uPP+OXtuzcRY5ysM1XMM6PMJyPtWSG2Tq2WipaKkEhTLtoiV0R9sNKKsXkTDWRogUkcZH0o/xuEg/d98i3NHgUruvmES4/m2n2E5yyomEebMi75RKwyOtGeeYWX0BhMcmPErsnbNPj7sdNQ64dQTeKomfk7jAGp3BLynpWHbq73PiPL+7HEihv8H8CI+0hPFnMI9ZFfQKttiaZTMqZNfHnZQ5N2KIvJ16sGMi0O57yhtO+KCX1/YqYMhQtojwJH7VCrS9adljoceuiy9LBccz/Dokqll2Kq82M="
+aws_access_key_id="ASIA34DVVZVVED4WJKVB"
+aws_secret_access_key="uBmG5nYU9BiCLeWv/QtFXqnwUZkaJA0+pnOLeOXG"
+aws_session_token="FwoGZXIvYXdzEJ7//////////wEaDPrtbGKMm++Lr89AzyLLAUYGhcEXC60EVS1t9MVk6edLbNRgJOwJiAINntoC7nE1xAW2MZNaWXwtrHtogRCW/+AjL6MYhV0vskcwtoK9w0as90VUDw4V93CndAAWr9CBXmzxZPU/7FOnRgd5gdLbrxCSw7L4pYEqCyinzxt5/mvg7vhBwUXZDGSaHOSD5MvbwAha94GXGlho0pDhhnf9XqLYxIhzFwyaXdROFeoq3rWf/TNq8WJ3LEen7gcET2l5ATbVlVONFz7ZgZzMU+/yJqEp29+tXbVFhEQ/KLG52KsGMi1TBAguwajZOmU2MQ9cvF0wDijqgQL3e7mPSmIft3dptng6nYkjui6k7oSi+vA="
+
 
 sns = boto3.client(
     'sns',
@@ -27,6 +29,7 @@ s3 = boto3.client(
 )
 S3_BUCKET = 'proyectoaws-s3'
 
+# Terminan credenciales
 
 alumnos = Blueprint('alumnos', __name__)
 
@@ -72,8 +75,8 @@ def addAlumno():
         data = request.json
 
         # Validar campos no nulos
-        if None in [data.get('nombres'), data.get('apellidos'), data.get('matricula')]:
-            return jsonify({"error": "Los campos de nombres, apellidos y matricula no pueden ser nulos"}), 400
+        if None in [data.get('nombres'), data.get('apellidos'), data.get('matricula'), data.get('password')]:
+            return jsonify({"error": "Los campos de nombres, apellidos, matricula y password no pueden ser nulos"}), 400
 
         # Validar promedio no negativo
         if data.get('promedio', 0) < 0:
@@ -84,7 +87,8 @@ def addAlumno():
             nombres=data['nombres'],
             apellidos=data['apellidos'],
             matricula=data['matricula'],
-            promedio=data.get('promedio', 0)  # Valor predeterminado de 0 si no se proporciona el promedio
+            promedio=data.get('promedio', 0),
+            password=data['password']
         )
 
         # Agregar el nuevo alumno a la sesión de la base de datos
@@ -98,7 +102,8 @@ def addAlumno():
             "nombres": nuevo_alumno.nombres,
             "apellidos": nuevo_alumno.apellidos,
             "matricula": nuevo_alumno.matricula,
-            "promedio": nuevo_alumno.promedio
+            "promedio": nuevo_alumno.promedio,
+            "password": nuevo_alumno.password
         }), 201
 
     except ValueError:
