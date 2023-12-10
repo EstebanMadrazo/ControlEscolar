@@ -4,6 +4,7 @@ from routes.profesores import profesores
 from utils.db import db
 from flask_migrate import Migrate
 
+
 app = Flask(__name__)
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:69ElZorroGalact1c0{@proyectoaws-rds-instance-1.cnaidaq0z56w.us-east-1.rds.amazonaws.com:5432'

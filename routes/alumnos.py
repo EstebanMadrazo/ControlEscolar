@@ -1,14 +1,30 @@
-from flask import Blueprint, Flask, jsonify, request, json
+from flask import Blueprint, Flask, jsonify, request, json, current_app
 from models.alumno import Alumno
 from utils.db import db
 import boto3
 import botocore.exceptions
 from werkzeug.utils import secure_filename
 
-aws_access_key_id = 'ASIA34DVVZVVAP4C6Y3K'
-aws_secret_access_key = 'uhahySFfg4UGCcSZb4e8KuTa4uKNwDRHoQJwUEdQ'
-aws_session_token = 'FwoGZXIvYXdzEIn//////////wEaDBEFNmgaZWh+1p/9fSLLAbdadhjQeT48gV+myxqegPbclAGqmfDEVrM1FSoc2ArE8QK0rZQD05lRYVfGBS79LgIc9tF3bZO0uK5QSfzHi1GEFeHl0hEkypwDSv6JRtpGCNjAe9U0FyxKCc/D+rflN/LetANEspjsVpbDSu+fSmkpDcrxtkdtHEjgsotEJbGOg3qpO//ATiOaRXkepCoFKsOj3h4y6XzlWHRODF6TpX3uReRCUHfIu6s+Cu/ATjzzgHSK0aYnXsV463LgXEoaN7lN9BpQMhxofW8WKMjr06sGMi1wOf1B3Eqch3Aq+o1MdTazSeth9I0y7rGMp3r016IePJuUzfIwUCH3ZkwS41A='
-s3 = boto3.client('s3', aws_access_key_id=aws_access_key_id, aws_secret_access_key=aws_secret_access_key, aws_session_token=aws_session_token)
+sns = boto3.client('sns', region_name='us-east-1')  # Ajusta la región según tus necesidades
+TOPIC_ARN = 'arn:aws:sns:us-east-1:816290581866:proyectoAWS-topic'
+aws_access_key_id="ASIA34DVVZVVAGQYBBQ2"
+aws_secret_access_key="e3K2Cf87Qo10yimzk9Izy6mlpCfZvOohl26CKcR5"
+aws_session_token="FwoGZXIvYXdzEJr//////////wEaDLHfHsmY+dhXi1Tq3CLLAUcNNePBuk9OP6P/ONuCNvWYhCwXO0qiAfvEvTlzsiQujE/oD61J+uPP+OXtuzcRY5ysM1XMM6PMJyPtWSG2Tq2WipaKkEhTLtoiV0R9sNKKsXkTDWRogUkcZH0o/xuEg/d98i3NHgUruvmES4/m2n2E5yyomEebMi75RKwyOtGeeYWX0BhMcmPErsnbNPj7sdNQ64dQTeKomfk7jAGp3BLynpWHbq73PiPL+7HEihv8H8CI+0hPFnMI9ZFfQKttiaZTMqZNfHnZQ5N2KIvJ16sGMi0O57yhtO+KCX1/YqYMhQtojwJH7VCrS9adljoceuiy9LBccz/Dokqll2Kq82M="
+
+sns = boto3.client(
+    'sns',
+    region_name='us-east-1',
+    aws_access_key_id=aws_access_key_id,
+    aws_secret_access_key=aws_secret_access_key,
+    aws_session_token=aws_session_token
+)
+
+s3 = boto3.client(
+    's3',
+    aws_access_key_id=aws_access_key_id,
+    aws_secret_access_key=aws_secret_access_key,
+    aws_session_token=aws_session_token
+)
 S3_BUCKET = 'proyectoaws-s3'
 
 
@@ -30,24 +46,24 @@ def getAlumnos():
 
         return jsonify(alumnos_list)
 
-@alumnos.route('/alumnos/<int:id>')
+@alumnos.route('/alumnos/<int:id>', methods=['GET'])
 def getAlumno(id):
-        # Buscar el alumno en la base de datos por ID
-        alumno = Alumno.query.get(id)
+    # Buscar el alumno en la base de datos por ID
+    alumno = Alumno.query.get(id)
 
-        if alumno:
-            # Convertir el objeto Alumno a un diccionario antes de devolverlo como JSON
-            alumno_dict = {
-                'id': alumno.id,
-                'nombres': alumno.nombres,
-                'apellidos': alumno.apellidos,
-                'matricula': alumno.matricula,
-                'promedio': alumno.promedio
-            }
-            return jsonify(alumno_dict)
-        else:
-            return jsonify({'error': 'Alumno no encontrado'}), 404
-
+    if alumno:
+        # Convertir el objeto Alumno a un diccionario antes de devolverlo como JSON
+        alumno_dict = {
+            'id': alumno.id,
+            'nombres': alumno.nombres,
+            'apellidos': alumno.apellidos,
+            'matricula': alumno.matricula,
+            'promedio': alumno.promedio,
+            'fotoPerfilUrl': alumno.fotoPerfilUrl  # Agregar la URL de la foto de perfil
+        }
+        return jsonify(alumno_dict)
+    else:
+        return jsonify({'error': 'Alumno no encontrado'}), 404
 
 @alumnos.route('/alumnos', methods=['POST'])
 def addAlumno():
@@ -177,4 +193,64 @@ def deleteAlumno(id):
 
 @alumnos.route('/alumnos/<int:id>/fotoPerfil', methods=['POST'])
 def uploadFotoPerfil(id):
-    return "hello"
+    try:
+        # Verificar si se incluyó un archivo en la solicitud
+        if 'foto' not in request.files:
+            return jsonify({"error": "No se incluyó ningún archivo"}), 405
+
+        file = request.files['foto']
+
+        # Verificar si el archivo tiene un nombre
+        if file.filename == '':
+            return jsonify({"error": "Nombre de archivo no válido"}), 400
+
+        # Verificar si el alumno existe en la base de datos
+        alumno = Alumno.query.get(id)
+        if not alumno:
+            return jsonify({"error": "Alumno no encontrado"}), 404
+
+        # Subir la imagen a S3
+        filename = secure_filename(file.filename)
+        s3.upload_fileobj(file, S3_BUCKET, filename)
+
+        # Actualizar la URL de la foto de perfil en la base de datos
+        alumno.fotoPerfilUrl = f'https://{S3_BUCKET}.s3.amazonaws.com/{filename}'
+        db.session.commit()
+
+        return jsonify({"fotoPerfilUrl": alumno.fotoPerfilUrl}), 200
+
+    except Exception as e:
+        # Manejar otros errores
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 500
+    finally:
+        # Cerrar la sesión de la base de datos
+        db.session.close()
+    
+@alumnos.route('/alumnos/<int:id>/email', methods=['POST'])
+def sendEmail(id):
+    try:
+        # Buscar el alumno en la base de datos por ID
+        alumno = Alumno.query.get(id)
+
+        if not alumno:
+            return jsonify({"error": "Alumno no encontrado"}), 404
+
+        # Construir el mensaje para la alerta de SNS
+        mensaje = f"Promedio: {alumno.promedio}\nNombres: {alumno.nombres}\nApellidos: {alumno.apellidos}"
+
+        # Enviar la alerta de SNS
+        response = sns.publish(
+            TopicArn=TOPIC_ARN,
+            Subject=f"Datos del alumno {alumno.nombres}",
+            Message=mensaje,
+            MessageStructure='string',
+        )
+
+        return jsonify({"message": "Alerta de SNS enviada correctamente"}), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    finally:
+        # Cerrar la sesión de la base de datos
+        db.session.close()
