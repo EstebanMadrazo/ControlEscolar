@@ -5,9 +5,9 @@ class Alumno(db.Model):
     nombres = db.Column(db.String(50))
     apellidos = db.Column(db.String(50))
     matricula = db.Column(db.String(8))
-    promedio = db.Column(db.Integer)
+    promedio = db.Column(db.Double)
     fotoPerfilUrl = db.Column(db.String(255))
-    password = db.Column(db.String(255))  # Agrega este campo
+    password = db.Column(db.String(255)) 
     
     def __init__(self, nombres, apellidos, matricula, promedio, password):
         self.nombres = nombres
