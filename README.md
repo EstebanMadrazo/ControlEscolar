@@ -1,24 +1,25 @@
 # ProyectoAWSAcademy
+
 Proyecto escolar para la materia AWS Academy
 
-Endpoints actuales:
+### Para descargar el proyecto usa
 
-○ GET /alumnos
+>git clone https://github.com/JulianChan123/ProyectoAWSAcademy
 
-○ GET /alumnos/{id}
+### Para ejecutar el proyecto primero crea un entorno virtual e instala las dependencias necesarias en requirements.txt
 
-○ POST /alumnos
+>python -m venv venv<br />
+>source venv/bin/activate<br />
+>pip install -r requirements.txt
 
-○ PUT /alumnos/{id}
+>.[!IMPORTANT]
+>Despues de ajustar el uri a tu base de datos debes realizar las migraciones para que se creen las tablas
 
-○ DELETE /alumnos/{id}
+>flask db init<br />
+>flask db migrate<br />
+>flask db upgrade
 
-○ GET /profesores
+### Para ejecutar el proyecto usa
 
-○ GET /profesores/{id}
+>flask run
 
-○ POST /profesores
-
-○ PUT /profesores/{id}
-
-○ DELETE /profesores/{id}
