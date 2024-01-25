@@ -12,8 +12,8 @@ Proyecto escolar para la materia AWS Academy
 >source venv/bin/activate<br />
 >pip install -r requirements.txt
 
->.[!IMPORTANT]
->Despues de ajustar el uri a tu base de datos debes realizar las migraciones para que se creen las tablas
+> [!IMPORTANT]
+> Despues de ajustar el uri a tu base de datos debes realizar las migraciones para que se creen las tablas
 
 >flask db init<br />
 >flask db migrate<br />
