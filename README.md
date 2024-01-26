@@ -2,6 +2,7 @@
 
 ## Arquitectura del sistema
 ![Alt text](DiagramasDiseno/Arquitectura.jpg?raw=true "Arquitectura")
+![Alt text](DiagramasDiseno/ServiceArchitecture.jpg?raw=true "Servicio")
 
 
 ## Ejecución del proyecto
