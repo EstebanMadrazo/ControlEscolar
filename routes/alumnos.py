@@ -1,32 +1,10 @@
 from flask import Blueprint, Flask, jsonify, request, json, current_app
 from models.alumno import Alumno
 from utils.db import db
+import bcrypt
 import boto3
 import botocore.exceptions
 from werkzeug.utils import secure_filename
-
-#Deharcodear credenciales en el futuro
-sns = boto3.client('sns', region_name='us-east-1')  
-TOPIC_ARN = 'arn:aws:sns:us-east-1:816290581866:proyectoAWS-topic'
-aws_access_key_id="ASIA34DVVZVVIEHVFQAT"
-aws_secret_access_key="dOx3MUp8KhDMaWxJAA2Kv/zpPOViCpvGdANArxuL"
-aws_session_token="FwoGZXIvYXdzENL//////////wEaDJHOrI9lcaLlBVU91CLLAexygg3RMaoLoYmx7TPPefrpgA9Gv9f4PEr2WXTwq7TEtYndaHtYkUoS8eSqCb45odvb97i1dCHVV5tjy5gYwX45e+UZcyayqaXp8xfallzdzgmkV8gulm25WJ6YyhGfVVJGidRKX666FlFwXY6CG4Vgkg233nIBE1V+KpoxUM98AACfiHrkcsgnALi75SBNsxqRcXZK7SYcnhNncm2F9fymwmRDXdNZa9V3+7hPvY0D1Npz/v56w41I/RSQ+BD00DSd1InR/i3EHwGyKND846sGMi3At4MVeHML5Ccu0NfaAVbQusm53lFM1OWvtUi9QZeMKkgCXhY+T5xyVy+OpRs="
-
-sns = boto3.client(
-    'sns',
-    region_name='us-east-1',
-    aws_access_key_id=aws_access_key_id,
-    aws_secret_access_key=aws_secret_access_key,
-    aws_session_token=aws_session_token
-)
-
-s3 = boto3.client(
-    's3',
-    aws_access_key_id=aws_access_key_id,
-    aws_secret_access_key=aws_secret_access_key,
-    aws_session_token=aws_session_token
-)
-S3_BUCKET = 'proyectoaws-s3'
 
 # Terminan credenciales
 
@@ -81,13 +59,16 @@ def addAlumno():
         if data.get('promedio', 0) < 0:
             return jsonify({"error": "El promedio no puede ser negativo"}), 400
 
+        # Encriptar la contraseña
+        hashed_password = bcrypt.hashpw(data['password'].encode('utf-8'), bcrypt.gensalt())
+
         # Crear un nuevo objeto Alumno
         nuevo_alumno = Alumno(
             nombres=data['nombres'],
             apellidos=data['apellidos'],
             matricula=data['matricula'],
             promedio=data.get('promedio', 0),
-            password=data['password']
+            password=hashed_password
         )
 
         # Agregar el nuevo alumno a la sesión de la base de datos
@@ -231,7 +212,7 @@ def uploadFotoPerfil(id):
         # Cerrar la sesión de la base de datos
         db.session.close()
     
-@alumnos.route('/alumnos/<int:id>/email', methods=['POST'])
+"""@alumnos.route('/alumnos/<int:id>/email', methods=['POST'])
 def sendEmail(id):
     try:
         # Buscar el alumno en la base de datos por ID
@@ -258,3 +239,4 @@ def sendEmail(id):
     finally:
         # Cerrar la sesión de la base de datos
         db.session.close()
+"""

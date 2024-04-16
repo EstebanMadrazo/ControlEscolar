@@ -4,26 +4,10 @@ import uuid
 import time
 import string
 import random
-from boto3.dynamodb.conditions import Key
 import boto3
-from botocore.exceptions import ClientError
-
 
 sesiones_alumnos = Blueprint('sesiones_alumnos', __name__)
 
-#Deharcodear las credenciales en el futuro
-aws_access_key_id="ASIA34DVVZVVIEHVFQAT"
-aws_secret_access_key="dOx3MUp8KhDMaWxJAA2Kv/zpPOViCpvGdANArxuL"
-aws_session_token="FwoGZXIvYXdzENL//////////wEaDJHOrI9lcaLlBVU91CLLAexygg3RMaoLoYmx7TPPefrpgA9Gv9f4PEr2WXTwq7TEtYndaHtYkUoS8eSqCb45odvb97i1dCHVV5tjy5gYwX45e+UZcyayqaXp8xfallzdzgmkV8gulm25WJ6YyhGfVVJGidRKX666FlFwXY6CG4Vgkg233nIBE1V+KpoxUM98AACfiHrkcsgnALi75SBNsxqRcXZK7SYcnhNncm2F9fymwmRDXdNZa9V3+7hPvY0D1Npz/v56w41I/RSQ+BD00DSd1InR/i3EHwGyKND846sGMi3At4MVeHML5Ccu0NfaAVbQusm53lFM1OWvtUi9QZeMKkgCXhY+T5xyVy+OpRs="
-
-
-dynamodb = boto3.resource('dynamodb', 
-region_name='us-east-1', 
-aws_access_key_id=aws_access_key_id, 
-aws_secret_access_key=aws_secret_access_key,
-aws_session_token=aws_session_token)
-
-sesiones_alumnos_table = dynamodb.Table('sesiones-alumnos')  
 
 def generate_session_string(length=128):
     characters = string.ascii_letters + string.digits
