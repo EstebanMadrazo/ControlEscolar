@@ -56,8 +56,8 @@ def addAlumno():
             return jsonify({"error": "Los campos de nombres, apellidos, matricula y password no pueden ser nulos"}), 400
 
         # Validar promedio no negativo
-        if data.get('promedio', 0) < 0:
-            return jsonify({"error": "El promedio no puede ser negativo"}), 400
+        if data.get('promedio', 0) < 0 or data.get('promedio', 0) > 100:
+            return jsonify({"error": "El promedio tiene que estar entre 0 y 100"}), 400
 
         # Encriptar la contraseña
         hashed_password = bcrypt.hashpw(data['password'].encode('utf-8'), bcrypt.gensalt())
